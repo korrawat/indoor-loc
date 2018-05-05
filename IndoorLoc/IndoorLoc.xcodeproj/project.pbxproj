@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		60C52A41209D413F003DEC38 /* BLE.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C52A40209D413F003DEC38 /* BLE.swift */; };
+		60C52A43209D41A2003DEC38 /* SensorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C52A42209D41A2003DEC38 /* SensorModel.swift */; };
 		B3690369209D34D700E6DFBD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3690368209D34D700E6DFBD /* AppDelegate.swift */; };
 		B369036B209D34D700E6DFBD /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B369036A209D34D700E6DFBD /* ViewController.swift */; };
 		B369036E209D34D700E6DFBD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B369036C209D34D700E6DFBD /* Main.storyboard */; };
@@ -35,6 +37,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		60C52A40209D413F003DEC38 /* BLE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLE.swift; sourceTree = "<group>"; };
+		60C52A42209D41A2003DEC38 /* SensorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorModel.swift; sourceTree = "<group>"; };
 		B3690365209D34D700E6DFBD /* IndoorLoc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IndoorLoc.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3690368209D34D700E6DFBD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B369036A209D34D700E6DFBD /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -106,6 +110,8 @@
 				B3690374209D34D900E6DFBD /* LaunchScreen.storyboard */,
 				B3690377209D34D900E6DFBD /* Info.plist */,
 				B369036F209D34D700E6DFBD /* IndoorLoc.xcdatamodeld */,
+				60C52A40209D413F003DEC38 /* BLE.swift */,
+				60C52A42209D41A2003DEC38 /* SensorModel.swift */,
 			);
 			path = IndoorLoc;
 			sourceTree = "<group>";
@@ -259,9 +265,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				60C52A43209D41A2003DEC38 /* SensorModel.swift in Sources */,
 				B369036B209D34D700E6DFBD /* ViewController.swift in Sources */,
 				B3690371209D34D700E6DFBD /* IndoorLoc.xcdatamodeld in Sources */,
 				B3690369209D34D700E6DFBD /* AppDelegate.swift in Sources */,
+				60C52A41209D413F003DEC38 /* BLE.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -435,13 +443,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = Z3G53PFXUB;
+				DEVELOPMENT_TEAM = 6528P4SDC2;
 				INFOPLIST_FILE = IndoorLoc/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "MIT-6.S062.IndoorLoc";
+				PRODUCT_BUNDLE_IDENTIFIER = MissKitCat.IndoorLoc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -453,13 +461,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = Z3G53PFXUB;
+				DEVELOPMENT_TEAM = 6528P4SDC2;
 				INFOPLIST_FILE = IndoorLoc/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "MIT-6.S062.IndoorLoc";
+				PRODUCT_BUNDLE_IDENTIFIER = MissKitCat.IndoorLoc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

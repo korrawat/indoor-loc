@@ -14,13 +14,13 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        let url = URL(string: "http://159.65.37.143:3000/addpoint/2")
-
-        let task = URLSession.shared.dataTask(with: url!) {(data, response, error) in
-            print(NSString(data: data!, encoding: String.Encoding.utf8.rawValue))
-        }
-
-        task.resume()
+//        let url = URL(string: "http://159.65.37.143:3000/addpoint/2")
+//
+//        let task = URLSession.shared.dataTask(with: url!) {(data, response, error) in
+//            print(NSString(data: data!, encoding: String.Encoding.utf8.rawValue))
+//        }
+//
+//        task.resume()
     }
 
     override func didReceiveMemoryWarning() {

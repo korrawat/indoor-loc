@@ -167,7 +167,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
 //                print("Too Far")
 //                break
 //            }
-            var beaconArray: [Any]
+            var beaconArray = [Any]()
             for beacon in beacons {
                 let major = CLBeaconMajorValue(beacon.major)
                 let minor = CLBeaconMinorValue(beacon.minor)
@@ -187,7 +187,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             
             print("Beacons: ", beaconArray)
             
-            sendData(beaconArray)
+            sendData(json: beaconArray)
         }
     }
     

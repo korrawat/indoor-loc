@@ -9,3 +9,10 @@
         "accuracy": 0.13,
     }]
 }
+
+{
+    "stepsTaken": 1,
+    "distanceTraveled": 1,
+    "pace": 1, 
+    "cadence": 1
+}

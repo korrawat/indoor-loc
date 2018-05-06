@@ -24,9 +24,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var accYLabel: UILabel!
     @IBOutlet weak var accZLabel: UILabel!
     
-    private func sendData() {
-        
-        
+    private func sendData(json: [Any]) {
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
         
         let url = URL(string: "http://159.65.37.143:3000/addpoint/2")
@@ -35,7 +33,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
-                print(NSString(data: data, encoding: String.Encoding.utf8.rawValue) ?? "default")
+                print(error?.localizedDescription ?? "No data")
                 return
             }
         }
@@ -151,24 +149,43 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                          didRangeBeacons beacons: [CLBeacon],
                          in region: CLBeaconRegion) {
         if beacons.count > 0 {
-            let nearestBeacon = beacons.first!
-            let major = CLBeaconMajorValue(nearestBeacon.major)
-            let minor = CLBeaconMinorValue(nearestBeacon.minor)
-            
-            switch nearestBeacon.proximity {
-            case .near, .immediate:
-                // Display information about the relevant exhibit.
-                print("Major, Minor: ", major, minor)
-                print("nearest Beacon: ", nearestBeacon)
-                break
+//            let nearestBeacon = beacons.first!
+//            let major = CLBeaconMajorValue(nearestBeacon.major)
+//            let minor = CLBeaconMinorValue(nearestBeacon.minor)
+//
+//            switch nearestBeacon.proximity {
+//            case .near, .immediate:
+//                // Display information about the relevant exhibit.
+//                print("Major, Minor: ", major, minor)
+//                print("nearest Beacon: ", nearestBeacon)
+//                break
+//
+//            default:
+//                // Dismiss exhibit information, if it is displayed.
+//                print("Too Far")
+//                break
+//            }
+            var beaconArray: [Any]
+            for beacon in beacons {
+                let major = CLBeaconMajorValue(beacon.major)
+                let minor = CLBeaconMinorValue(beacon.minor)
+                let rssi = beacon.rssi
+                let accuracy = beacon.accuracy
+                let proximity = beacon.proximity
                 
-            default:
-                // Dismiss exhibit information, if it is displayed.
-                print("Too Far")
-                break
+                let beaconDict: [String: Any] = [
+                    "minor": minor,
+                    "rssi": rssi,
+                    "accuracy": accuracy,
+                    "proximity": proximity
+                ]
+                
+                beaconArray.append(beaconDict)
             }
             
-            print("Beacons: ", beacons.count, beacons)
+            print("Beacons: ", beaconArray)
+            
+            sendData(beaconArray)
         }
     }
     

@@ -6,6 +6,6 @@
         "minor": 1,
         "rssi": -73,
         "proximity": 1,
-        "error": 0.13,
+        "accuracy": 0.13,
     }]
 }

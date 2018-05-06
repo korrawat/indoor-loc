@@ -15,6 +15,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     let locationManager = CLLocationManager()
     var motionManager: CMMotionManager!
     var timer: Timer!
+    var beaconsToRange: [CLBeaconRegion] = []
     
     @IBOutlet weak var headingLabel: UILabel!
     @IBOutlet weak var accXLabel: UILabel!
@@ -33,6 +34,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
 //
 //        task.resume()
         
+        locationManager.requestAlwaysAuthorization()
         locationManager.requestWhenInUseAuthorization()
         
         locationManager.delegate = self
@@ -44,7 +46,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         
         motionManager = CMMotionManager()
         motionManager.startAccelerometerUpdates()
+        
         startAccelerometers()
+        monitorBeacons();
     }
 
     override func didReceiveMemoryWarning() {
@@ -99,6 +103,66 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         print(status)
         print(status.rawValue)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+        print("Exit region");
+    }
+    
+    func locationManager(_ manager: CLLocationManager,
+                         didEnterRegion region: CLRegion) {
+        
+        print("Enter: ", region);
+        print("region.id: ", region.identifier);
+        if region is CLBeaconRegion {
+            // Start ranging only if the feature is available.
+            if CLLocationManager.isRangingAvailable() {
+                manager.startRangingBeacons(in: region as! CLBeaconRegion)
+                
+                // Store the beacon so that ranging can be stopped on demand.
+                beaconsToRange.append(region as! CLBeaconRegion)
+            }
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager,
+                         didRangeBeacons beacons: [CLBeacon],
+                         in region: CLBeaconRegion) {
+        if beacons.count > 0 {
+            let nearestBeacon = beacons.first!
+            let major = CLBeaconMajorValue(nearestBeacon.major)
+            let minor = CLBeaconMinorValue(nearestBeacon.minor)
+            
+            switch nearestBeacon.proximity {
+            case .near, .immediate:
+                // Display information about the relevant exhibit.
+                print("Major, Minor: ", major, minor)
+                print("nearest Beacon: ", nearestBeacon)
+                break
+                
+            default:
+                // Dismiss exhibit information, if it is displayed.
+                print("Too Far")
+                break
+            }
+        }
+    }
+    
+    func monitorBeacons() {
+        if CLLocationManager.isMonitoringAvailable(for:
+            CLBeaconRegion.self) {
+            // Match all beacons with the specified UUID
+            let proximityUUID = UUID(uuidString:
+                "FDA50693-A4E2-4FB1-AFCF-C6EB07647825")
+            let beaconID = "com.example.myBeaconRegion"
+            
+            // Create the region and begin monitoring it.
+            let region = CLBeaconRegion(proximityUUID: proximityUUID!,
+                                        identifier: beaconID)
+            self.locationManager.startMonitoring(for: region)
+            
+            print("is monitoring BLE");
+        }
     }
 
 }

@@ -437,10 +437,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6528P4SDC2;
+				DEVELOPMENT_TEAM = Z3G53PFXUB;
 				INFOPLIST_FILE = IndoorLoc/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = MissKitCat.IndoorLoc;
+				PRODUCT_BUNDLE_IDENTIFIER = korrawat.IndoorLoc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -452,10 +452,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6528P4SDC2;
+				DEVELOPMENT_TEAM = Z3G53PFXUB;
 				INFOPLIST_FILE = IndoorLoc/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = MissKitCat.IndoorLoc;
+				PRODUCT_BUNDLE_IDENTIFIER = korrawat.IndoorLoc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

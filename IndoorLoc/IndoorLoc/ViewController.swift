@@ -145,6 +145,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 print("Too Far")
                 break
             }
+            
+            print("Beacons: ", beacons.count, beacons)
         }
     }
     

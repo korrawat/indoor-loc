@@ -1,0 +1,11 @@
+// Data format from mobile sending to the server
+// POST /ibeacon 
+{
+    "uuid": "FDA50693-A4E2-4FB1-AFCF-C6EB07647825",
+    "beacons": [{
+        "minor": 1,
+        "rssi": -73,
+        "proximity": 1,
+        "error": 0.13,
+    }]
+}

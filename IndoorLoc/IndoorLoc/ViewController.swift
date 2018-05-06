@@ -125,10 +125,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         print(status.rawValue)
     }
     
-    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        print("Exit region");
-    }
-    
     func locationManager(_ manager: CLLocationManager,
                          didEnterRegion region: CLRegion) {
         
@@ -145,10 +141,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         }
     }
     
+    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+        beaconsToRange = beaconsToRange.filter() {$0 != region}
+        print("Exit region");
+    }
+    
     func locationManager(_ manager: CLLocationManager,
                          didRangeBeacons beacons: [CLBeacon],
                          in region: CLBeaconRegion) {
         if beacons.count > 0 {
+
 //            let nearestBeacon = beacons.first!
 //            let major = CLBeaconMajorValue(nearestBeacon.major)
 //            let minor = CLBeaconMinorValue(nearestBeacon.minor)
@@ -196,9 +198,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             let proximityUUID = UUID(uuidString:
                 "FDA50693-A4E2-4FB1-AFCF-C6EB07647825")
             let beaconID = "com.example.myBeaconRegion"
+            let major: CLBeaconMajorValue = 10999
             
             // Create the region and begin monitoring it.
-            let region = CLBeaconRegion(proximityUUID: proximityUUID!,
+            let region = CLBeaconRegion(proximityUUID: proximityUUID!, major: major,
                                         identifier: beaconID)
             self.locationManager.startMonitoring(for: region)
             

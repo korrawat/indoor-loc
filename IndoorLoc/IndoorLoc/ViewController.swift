@@ -11,13 +11,15 @@ import CoreLocation
 import CoreMotion
 
 class ViewController: UIViewController, CLLocationManagerDelegate {
-    var curHeading = 0.0
+    var trueHeading = 0.0
+    var magneticHeading = 0.0
     let locationManager = CLLocationManager()
     var motionManager: CMMotionManager!
     var timer: Timer!
     var beaconsToRange: [CLBeaconRegion] = []
     
-    @IBOutlet weak var headingLabel: UILabel!
+    @IBOutlet weak var trueHeadingLabel: UILabel!
+    @IBOutlet weak var magneticHeadingLabel: UILabel!
     @IBOutlet weak var accXLabel: UILabel!
     @IBOutlet weak var accYLabel: UILabel!
     @IBOutlet weak var accZLabel: UILabel!
@@ -84,8 +86,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        curHeading = newHeading.trueHeading
-        headingLabel.text = String(format: "Heading: %.2f", curHeading)
+        // prefer magnetic heading (because true heading calculated using GPS)
+        trueHeading = newHeading.trueHeading
+        magneticHeading = newHeading.magneticHeading
+        trueHeadingLabel.text = String(format: "True Heading: %.2f", trueHeading)
+        magneticHeadingLabel.text = String(format: "Magn Heading: %.2f", magneticHeading)
     }
     
     

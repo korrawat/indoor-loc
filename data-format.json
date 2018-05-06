@@ -2,6 +2,7 @@
 // POST /ibeacon 
 {
     "uuid": "FDA50693-A4E2-4FB1-AFCF-C6EB07647825",
+    "timestamp": 1231241231312 // seconds time
     "beacons": [{
         "minor": 1,
         "rssi": -73,
@@ -11,6 +12,7 @@
 }
 
 {
+    "timestamp": 1231241231312, // seconds time
     "stepsTaken": 1,
     "distanceTraveled": 1,
     "pace": 1, 

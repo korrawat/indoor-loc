@@ -11,10 +11,19 @@
     }]
 }
 
-{
+//POST /pedometers
+[{
     "timestamp": 1231241231312, // seconds time
     "stepsTaken": 1,
     "distanceTraveled": 1,
     "pace": 1, 
     "cadence": 1
+}]
+
+//POST /accelerometers
+
+{
+    "timestamp": 1231241231312, // seconds time,
+    
+    
 }

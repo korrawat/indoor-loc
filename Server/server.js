@@ -22,13 +22,13 @@ var export_data = function() {
 
 }
 
-setInterval(export_data, 10000);
+setInterval(export_data, 30000);
 
 app.post('/ibeacons', function(request, response){
     var new_data = request.body;
     // var ibeacons = JSON.parse(new_data.ibeacons);
     var ibeacons = new_data.ibeacons;
-    console.log("Receive new ibeacons data: ", new_data, new_data.ibeacons, ibeacons, typeof(ibeacons));      // your JSON
+    console.log("Receive new ibeacons data: ", request, new_data, new_data.ibeacons, ibeacons, typeof(ibeacons));      // your JSON
     for (i in ibeacons) {
         ibeacons_data.push(ibeacons[i]);
     }

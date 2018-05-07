@@ -188,22 +188,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                          didRangeBeacons beacons: [CLBeacon],
                          in region: CLBeaconRegion) {
         if beacons.count > 0 {
-//            let nearestBeacon = beacons.first!
-//            let major = CLBeaconMajorValue(nearestBeacon.major)
-//            let minor = CLBeaconMinorValue(nearestBeacon.minor)
-//
-//            switch nearestBeacon.proximity {
-//            case .near, .immediate:
-//                // Display information about the relevant exhibit.
-//                print("Major, Minor: ", major, minor)
-//                print("nearest Beacon: ", nearestBeacon)
-//                break
-//
-//            default:
-//                // Dismiss exhibit information, if it is displayed.
-//                print("Too Far")
-//                break
-//            }
             var beaconArray = [Any]()
             for beacon in beacons {
                 let major = CLBeaconMajorValue(beacon.major)

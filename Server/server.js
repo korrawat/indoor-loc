@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 
 var export_data = function() {
   const timestamp = Date.now();
-  const filename = "collected_data/" + timestamp.toString() + ".json";
+  const filename = "collected_data/ibeacons/" + timestamp.toString() + ".json";
   const json = JSON.stringify(ibeacons_data);
   fs.writeFile(filename, json, 'utf8', function(err) {
       if(err) {
@@ -22,17 +22,15 @@ var export_data = function() {
 
 }
 
-setInterval(export_data, 30000);
+setInterval(export_data, 60000);
 
 app.post('/ibeacons', function(request, response){
     var new_data = request.body;
-    // var ibeacons = JSON.parse(new_data.ibeacons);
     var ibeacons = new_data.ibeacons;
-    console.log("Receive new ibeacons data: ", request, new_data, new_data.ibeacons, ibeacons, typeof(ibeacons));      // your JSON
+    console.log("Receive new ibeacons data: ", ibeacons.length, "\t",  ibeacons);      // your JSON
     for (i in ibeacons) {
         ibeacons_data.push(ibeacons[i]);
     }
-    // ibeacons_data = ibeacons_data.concat(ibeacons);
     console.log("ibeacons_data: ", ibeacons_data);
     response.send("Received!");    // echo the result back
 });

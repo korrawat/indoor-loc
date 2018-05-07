@@ -32,6 +32,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         var request = URLRequest(url: url!);
         request.httpMethod = "POST";
         request.httpBody = jsonData;
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 //        {"name": "hello"}
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in

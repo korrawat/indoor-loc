@@ -14,6 +14,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     var trueHeading = 0.0
     var magneticHeading = 0.0
     let locationManager = CLLocationManager()
+    let pedometer = CMPedometer()
     var motionManager: CMMotionManager!
     var timer: Timer!
     var beaconsToRange: [CLBeaconRegion] = []
@@ -24,20 +25,23 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var accYLabel: UILabel!
     @IBOutlet weak var accZLabel: UILabel!
     
-    private func sendData(json: [Any]) {
+    private func sendData(json: [String: Any]) {
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
         
-        let url = URL(string: "http://159.65.37.143:3000/addpoint/2")
+        let url = URL(string: "http://159.65.37.143:3000/ibeacons")
         var request = URLRequest(url: url!)
         request.httpMethod = "POST"
+        request.httpBody = jsonData
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
                 return
             }
+            
+            print(NSString(data: data, encoding: String.Encoding.utf8.rawValue) ?? "default")
         }
-    }
+    } 
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -171,7 +175,19 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 let minor = CLBeaconMinorValue(beacon.minor)
                 let rssi = beacon.rssi
                 let accuracy = beacon.accuracy
-                let proximity = beacon.proximity
+                var proximity = 0
+                
+                switch beacon.proximity {
+                case .near:
+                    proximity = 0
+                case .immediate:
+                    proximity = 1
+                case .far:
+                    proximity = 2
+                default:
+                    proximity = 3
+                }
+                
                 
                 let beaconDict: [String: Any] = [
                     "minor": minor,
@@ -184,8 +200,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             }
             
             print("Beacons: ", beaconArray)
+            let timestamp = Date().timeIntervalSince1970
+            let jsonObj: [String: Any] = ["beacons": beaconArray, "timestamp": timestamp]
             
-            sendData(json: beaconArray)
+            sendData(json: jsonObj)
         }
     }
     

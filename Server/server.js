@@ -4,6 +4,8 @@ const fs = require('fs');
 const app = express()
 
 var ibeacons_data = [];
+var pedometer_data = [];
+var accelerometer_data = [];
 var curr_id = 0;
 
 app.use(bodyParser.json());
@@ -24,6 +26,7 @@ var export_data = function() {
 
 setInterval(export_data, 60000);
 
+// Receive beacon data whenever we enter/exit a beacon's region
 app.post('/ibeacons', function(request, response){
     var new_data = request.body;
     var ibeacons = new_data.ibeacons;
@@ -34,6 +37,30 @@ app.post('/ibeacons', function(request, response){
     console.log("ibeacons_data: ", ibeacons_data);
     response.send("Received!");    // echo the result back
 });
+
+// Receive beacon data whenever we enter/exit a beacon's region
+app.post('/pedometer', function(request, response){
+    var new_data = request.body;
+    pedometer_data.push(new_data)
+
+    console.log("Received pedometer data: ", request, new_data);
+    response.send("Received!");    // echo the result back
+});
+
+// Receive beacon data whenever we enter/exit a beacon's region
+app.post('/accelerometer', function(request, response){
+    var new_data = request.body;
+    var readings = new_data.readings;
+    var heading = new_data.magneticHeading;
+
+    for (r in readings) {
+      accelerometer_data.push(r)
+    }
+
+    console.log("Receive new magnetometer data: ", request, new_data);      // your JSON
+    response.send("Received!");    // echo the result back
+});
+
 
 app.get('/addpoint/:touchval', (req, res) => {
   var touchval = req.params.touchval;
@@ -80,4 +107,4 @@ app.get('/getlatestid', (req, res) => {
 })
 
 
-app.listen(3000, () => console.log('Localization is listening on port 3000!'))
+app.listen(3001, () => console.log('Localization is listening on port 3000!'))

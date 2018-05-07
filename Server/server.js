@@ -28,7 +28,7 @@ app.post('/ibeacons', function(request, response){
     var new_data = request.body;
     // var ibeacons = JSON.parse(new_data.ibeacons);
     var ibeacons = new_data.ibeacons;
-    console.log("Receive new ibeacons data: ", new_data.ibeacons, ibeacons, typeof(ibeacons));      // your JSON
+    console.log("Receive new ibeacons data: ", new_data, new_data.ibeacons, ibeacons, typeof(ibeacons));      // your JSON
     for (i in ibeacons) {
         ibeacons_data.push(ibeacons[i]);
     }

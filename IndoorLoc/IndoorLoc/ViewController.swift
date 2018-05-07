@@ -24,23 +24,48 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var accYLabel: UILabel!
     @IBOutlet weak var accZLabel: UILabel!
     
-    private func sendData(json: [Any]) {
+    private func sendData(json: [String: Any]) {
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
-        
-        let url = URL(string: "http://159.65.37.143:3000/addpoint/2")
-        var request = URLRequest(url: url!)
-        request.httpMethod = "POST"
-        
+        print("JSON: ", json);
+        let url = URL(string: "http://159.65.37.143:3000/ibeacons");
+        var request = URLRequest(url: url!);
+        request.httpMethod = "POST";
+        request.httpBody = jsonData;
+//        {"name": "hello"}
+
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
                 return
             }
         }
+        task.resume()
+//        let url = URL(string: "http://159.65.37.143:3000/ibeacons")!
+//
+//        // post the data
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        let postData = "Field1=Field1Data&Field2=Field2Data".data(using: .utf8)
+//        request.httpBody = postData
+//
+//        // execute the datatask and validate the result
+//        let task = URLSession.shared.dataTask(with: request) {
+//            (data, response, error) in
+//            if error == nil, let userObject = (try? JSONSerialization.jsonObject(with: data!, options: [])) {
+//                // you've got the jsonObject
+//            }
+//        }
+//        task.resume();
+//
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        while true {
+            sleep(3);
+            sendData(json: ["title": "hello"]);
+        }
         // Do any additional setup after loading the view, typically from a nib.
         
 //        let url = URL(string: "http://159.65.37.143:3000/addpoint/2")
@@ -171,7 +196,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 let minor = CLBeaconMinorValue(beacon.minor)
                 let rssi = beacon.rssi
                 let accuracy = beacon.accuracy
-                let proximity = beacon.proximity
+                let proximity = beacon.proximity.rawValue
                 
                 let beaconDict: [String: Any] = [
                     "minor": minor,
@@ -183,9 +208,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 beaconArray.append(beaconDict)
             }
             
-            print("Beacons: ", beaconArray)
+            let jsonData = ["ibeacons": beaconArray]
+            print("Beacons: ", jsonData)
             
-            sendData(json: beaconArray)
+//            sendData(json: jsonData)
         }
     }
     

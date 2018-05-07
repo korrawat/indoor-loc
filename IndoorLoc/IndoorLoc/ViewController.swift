@@ -73,6 +73,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         
         startAccelerometers()
         monitorBeacons();
+        startPedometer();
     }
 
     override func didReceiveMemoryWarning() {
@@ -105,6 +106,37 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             // Add the timer to the current run loop.
             RunLoop.current.add(self.timer!, forMode: .defaultRunLoopMode)
         }
+    }
+    
+    func startPedometer(){
+        pedometer.startUpdates(from: Date()) {
+            [weak self] pedometerData, error in
+            guard let pedometerData = pedometerData, error == nil else { print(error); return }
+            
+            DispatchQueue.main.async {
+                self?.updatePedometerData(pedometerData: pedometerData)
+            }
+        }
+    }
+    
+    func updatePedometerData(pedometerData: CMPedometerData){
+        var  pedometerDict = [String: Any]()
+        let timestamp = NSDate().timeIntervalSince1970
+        
+        var roundedDistance: Double = 0;
+        if pedometerData.distance != nil {
+            roundedDistance = pedometerData.distance!.doubleValue.rounded()
+        }
+
+        pedometerDict = [
+            "timestamp": timestamp,
+            "steps": pedometerData.numberOfSteps,
+            "distanceTraveled": roundedDistance,
+        ]
+        
+        print("Pedometer data:", pedometerDict)
+        sendData(json: pedometerDict)
+        
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
@@ -179,7 +211,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 let rssi = beacon.rssi
                 let accuracy = beacon.accuracy
                 let proximity = beacon.proximity.rawValue
-
+                
                 
                 let beaconDict: [String: Any] = [
                     "minor": minor,
@@ -190,8 +222,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 
                 beaconArray.append(beaconDict)
             }
+            
+            let timestamp = NSDate().timeIntervalSince1970
 
-            let jsonData = ["ibeacons": beaconArray]
+            let jsonData = ["ibeacons": beaconArray, "timestamp": timestamp] as [String : Any]
             print("Beacons: ", jsonData)
             
             sendData(json: jsonData)

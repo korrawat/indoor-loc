@@ -27,7 +27,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     
     private func sendData(json: [String: Any]) {
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
-        print("JSON: ", json);
+//        print("JSON: ", json);
         let url = URL(string: "http://159.65.37.143:3000/ibeacons");
         var request = URLRequest(url: url!);
         request.httpMethod = "POST";
@@ -189,6 +189,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                          in region: CLBeaconRegion) {
         if beacons.count > 0 {
             var beaconArray = [Any]()
+            print(beacons.count, beacons)
+            
+            let timestamp = NSDate().timeIntervalSince1970
+            
             for beacon in beacons {
                 let major = CLBeaconMajorValue(beacon.major)
                 let minor = CLBeaconMinorValue(beacon.minor)
@@ -196,22 +200,20 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 let accuracy = beacon.accuracy
                 let proximity = beacon.proximity.rawValue
                 
-                
                 let beaconDict: [String: Any] = [
                     "minor": minor,
                     "rssi": rssi,
                     "accuracy": accuracy,
-                    "proximity": proximity
+                    "proximity": proximity,
+                    "timestamp": timestamp
                 ]
                 
                 beaconArray.append(beaconDict)
             }
             
-            let timestamp = NSDate().timeIntervalSince1970
 
-            let jsonData = ["ibeacons": beaconArray, "timestamp": timestamp] as [String : Any]
-            print("Beacons: ", jsonData)
-            
+            let jsonData = ["ibeacons": beaconArray] as [String : Any]
+        
             sendData(json: jsonData)
         }
     }

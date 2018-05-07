@@ -33,7 +33,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         request.httpMethod = "POST";
         request.httpBody = jsonData;
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//        {"name": "hello"}
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
@@ -44,32 +43,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             print(NSString(data: data, encoding: String.Encoding.utf8.rawValue) ?? "default")
         }
         task.resume()
-//        let url = URL(string: "http://159.65.37.143:3000/ibeacons")!
-//
-//        // post the data
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        let postData = "Field1=Field1Data&Field2=Field2Data".data(using: .utf8)
-//        request.httpBody = postData
-//
-//        // execute the datatask and validate the result
-//        let task = URLSession.shared.dataTask(with: request) {
-//            (data, response, error) in
-//            if error == nil, let userObject = (try? JSONSerialization.jsonObject(with: data!, options: [])) {
-//                // you've got the jsonObject
-//            }
-//        }
-//        task.resume();
-//
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        while true {
-            sleep(3);
-            sendData(json: ["title": "hello"]);
-        }
         // Do any additional setup after loading the view, typically from a nib.
         
 //        let url = URL(string: "http://159.65.37.143:3000/addpoint/2")
@@ -216,7 +194,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             let jsonData = ["ibeacons": beaconArray]
             print("Beacons: ", jsonData)
             
-//            sendData(json: jsonData)
+            sendData(json: jsonData)
         }
     }
     

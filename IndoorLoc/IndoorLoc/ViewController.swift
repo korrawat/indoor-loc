@@ -14,9 +14,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     var trueHeading = 0.0
     var magneticHeading = 0.0
     let locationManager = CLLocationManager()
+    let pedometer = CMPedometer()
     var motionManager: CMMotionManager!
     var timer: Timer!
+    var sendloop: Timer!
     var beaconsToRange: [CLBeaconRegion] = []
+    var accelerometerArray = [Any]()
     
     @IBOutlet weak var trueHeadingLabel: UILabel!
     @IBOutlet weak var magneticHeadingLabel: UILabel!
@@ -24,32 +27,28 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var accYLabel: UILabel!
     @IBOutlet weak var accZLabel: UILabel!
     
-    private func sendData(json: [Any]) {
+    private func sendData(json: [String: Any], endpoint: String) {
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
-        
-        let url = URL(string: "http://159.65.37.143:3000/addpoint/2")
-        var request = URLRequest(url: url!)
-        request.httpMethod = "POST"
-        
+        print("JSON: ", json);
+        let url = URL(string: "http://159.65.37.143:3000/"+endpoint);
+        var request = URLRequest(url: url!);
+        request.httpMethod = "POST";
+        request.httpBody = jsonData;
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
                 return
             }
+            
+            print(NSString(data: data, encoding: String.Encoding.utf8.rawValue) ?? "default")
         }
+        task.resume()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
-//        let url = URL(string: "http://159.65.37.143:3000/addpoint/2")
-//
-//        let task = URLSession.shared.dataTask(with: url!) {(data, response, error) in
-//            print(NSString(data: data!, encoding: String.Encoding.utf8.rawValue) ?? "default")
-//        }
-//
-//        task.resume()
         
         locationManager.requestAlwaysAuthorization()
         locationManager.requestWhenInUseAuthorization()
@@ -66,6 +65,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         
         startAccelerometers()
         monitorBeacons();
+        startPedometer();
     }
 
     override func didReceiveMemoryWarning() {
@@ -80,7 +80,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             motionManager.startAccelerometerUpdates()
             
             // Configure a timer to fetch the data.
-            timer = Timer(fire: Date(), interval: (1.0/60.0),
+            timer = Timer(fire: Date(), interval: (10.0/60.0),
                                repeats: true, block: { (timer) in
                                 // Get the accelerometer data.
                                 if let data = self.motionManager.accelerometerData {
@@ -92,12 +92,69 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                                     self.accXLabel.text = String(format: "x: %+.2f", x)
                                     self.accYLabel.text = String(format: "y: %+.2f", y)
                                     self.accZLabel.text = String(format: "z: %+.2f", z)
+                                    
+                                    // Send accelerometer data to the server
+                                    
+                                    let timestamp = Date().timeIntervalSince1970
+                                    var accelerometerDict: [String: Any];
+                                    accelerometerDict = [
+                                        "timestamp": timestamp,
+                                        "xAcceleration": x,
+                                        "yAcceleration": y,
+                                        "zAcceleration": z ,
+                                    ]
+                                    
+                                    self.accelerometerArray.append(accelerometerDict);
+                                    
                                 }
+            })
+            
+            sendloop = Timer(fire: Date(), interval: 5.0, repeats: true, block: { (timer) in
+                print("Sending accelerometer data, len array", self.accelerometerArray.count)
+                var jsondata: [String: Any] = [
+                    "magneticHeading": self.magneticHeading,
+                    "readings": self.accelerometerArray
+                ]
+                
+                self.sendData(json: jsondata, endpoint: "accelerometer")
+                self.accelerometerArray = [Any]()
             })
             
             // Add the timer to the current run loop.
             RunLoop.current.add(self.timer!, forMode: .defaultRunLoopMode)
+            RunLoop.current.add(self.sendloop!, forMode: .defaultRunLoopMode)
         }
+    }
+    
+    func startPedometer(){
+        pedometer.startUpdates(from: Date()) {
+            [weak self] pedometerData, error in
+            guard let pedometerData = pedometerData, error == nil else { print(error); return }
+            
+            DispatchQueue.main.async {
+                self?.updatePedometerData(pedometerData: pedometerData)
+            }
+        }
+    }
+    
+    func updatePedometerData(pedometerData: CMPedometerData){
+        var  pedometerDict = [String: Any]()
+        let timestamp = NSDate().timeIntervalSince1970
+        
+        var roundedDistance: Double = 0;
+        if pedometerData.distance != nil {
+            roundedDistance = pedometerData.distance!.doubleValue.rounded()
+        }
+
+        pedometerDict = [
+            "timestamp": timestamp,
+            "steps": pedometerData.numberOfSteps,
+            "distanceTraveled": roundedDistance,
+        ]
+        
+        print("Pedometer data:", pedometerDict)
+        sendData(json: pedometerDict, endpoint: "pedometer")
+        
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
@@ -150,44 +207,34 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                          didRangeBeacons beacons: [CLBeacon],
                          in region: CLBeaconRegion) {
         if beacons.count > 0 {
-
-//            let nearestBeacon = beacons.first!
-//            let major = CLBeaconMajorValue(nearestBeacon.major)
-//            let minor = CLBeaconMinorValue(nearestBeacon.minor)
-//
-//            switch nearestBeacon.proximity {
-//            case .near, .immediate:
-//                // Display information about the relevant exhibit.
-//                print("Major, Minor: ", major, minor)
-//                print("nearest Beacon: ", nearestBeacon)
-//                break
-//
-//            default:
-//                // Dismiss exhibit information, if it is displayed.
-//                print("Too Far")
-//                break
-//            }
             var beaconArray = [Any]()
+            print(beacons.count, beacons)
+            
+            let timestamp = NSDate().timeIntervalSince1970
+            
             for beacon in beacons {
                 let major = CLBeaconMajorValue(beacon.major)
                 let minor = CLBeaconMinorValue(beacon.minor)
                 let rssi = beacon.rssi
                 let accuracy = beacon.accuracy
-                let proximity = beacon.proximity
+                let proximity = beacon.proximity.rawValue
                 
                 let beaconDict: [String: Any] = [
                     "minor": minor,
                     "rssi": rssi,
                     "accuracy": accuracy,
-                    "proximity": proximity
+                    "proximity": proximity,
+                    "timestamp": timestamp
                 ]
                 
                 beaconArray.append(beaconDict)
             }
             
-            print("Beacons: ", beaconArray)
+            let jsonData = ["ibeacons": beaconArray, "timestamp": timestamp] as [String : Any]
+            print("Number of Beacons: ", beacons.count)
+            print("Beacons: ", jsonData)
             
-            sendData(json: beaconArray)
+            sendData(json: jsonData, endpoint: "ibeacons")
         }
     }
     

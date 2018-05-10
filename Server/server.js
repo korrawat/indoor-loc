@@ -4,9 +4,10 @@ const fs = require('fs');
 const app = express()
 const mkdirp = require('mkdirp');
 
-const EXPORT_INTERVAL = 3 // in seconds
+const EXPORT_INTERVAL = 60 // in seconds
 const DEBUG = false;
 const DEFAULT_EXPORT_DIR = "collected_data/";
+const DATA_CATEGORIES = ["ibeacons", "pedometer", "accelerometer", "all"];
 
 var data = {"ibeacons": [], "pedometer": [], "accelerometer": []};
 var curr_id = 0;
@@ -17,11 +18,11 @@ app.use(bodyParser.json());
 var update_curr_dir = function(curr_label) {
   if(curr_label == '') {
     current_dir = DEFAULT_EXPORT_DIR;
-    console.log("Update curr dir to default :", current_dir);
+    // console.log("Update curr dir to default :", current_dir);
     return;
   }
   current_dir = DEFAULT_EXPORT_DIR + curr_label.toLowerCase().split(' ').join('_') + '/'
-  console.log("Update curr dir to ", current_dir, " from label ", curr_label)
+  // console.log("Update curr dir to ", current_dir, " from label ", curr_label)
 }
 
 var write_data_file = function(dir_path, category, timestamp) {
@@ -46,42 +47,49 @@ var write_data_file = function(dir_path, category, timestamp) {
 
 }
 
-var init_collection = function(dir_name, categories) {
+var init_collection = function(dir_name, categories, callback) {
   console.log("Creating a new collection ", dir_name, " ...")
-  EXPORT_DIR = dir_name + '/'
+  EXPORT_DIR = dir_name 
   mkdirp(EXPORT_DIR, function(err) { 
     if(err) {
-      console.log("Cannot create a collection dir: ", EXPORT_DIR)
+      console.log("Cannot create a collection dir: ", EXPORT_DIR);
     } else {
-      console.log("Create a collection dir: ", EXPORT_DIR)
-      for (i in categories) {
-        const subdir_name = EXPORT_DIR + categories[i] + '/';
-        mkdirp(subdir_name , function(err) { 
-          if(err) {
-            console.log("Cannot create a dir: ", subdir_name)
-          } else {
-            console.log("Create a dir: ", subdir_name)
+      console.log("Create a collection dir: ", EXPORT_DIR);
+
+      var itemsProcessed = 0;
+      categories.forEach((category, index, array) => {
+        const subdir_path = EXPORT_DIR + category + '/';
+        mkdirp(subdir_path , function(err) {
+          itemsProcessed++;
+          if(itemsProcessed === categories.length) {
+            callback();
           }
+          console.log("Create a dir: ", subdir_path, itemsProcessed);
         });
-      }
+      });
     }
   });
 }
 
-var export_data = function() {
+
+var write_to_collection = function() {
 
   const timestamp = Date.now().toString();
-  const data_categories = ["ibeacons", "pedometer", "accelerometer", "all"];
-
-  if (!fs.existsSync(current_dir)){
-    init_collection(current_dir, data_categories);
-  }
-
-  data_categories.forEach(function(category){
+  DATA_CATEGORIES.forEach(function(category){
     write_data_file(current_dir, category, timestamp);
   });
+  console.log("Export files " + timestamp + ".json to collection " + current_dir +" with categories: " + DATA_CATEGORIES.join(", "));
 
-  console.log("Export files: " + timestamp + ".json to " + data_categories.join(", "));
+}
+
+var export_data = function() {
+
+  if (!fs.existsSync(current_dir)){
+    init_collection(current_dir, DATA_CATEGORIES, write_to_collection);
+  } else {
+    write_to_collection();
+  }
+
 }
 
 setInterval(export_data, EXPORT_INTERVAL * 1000);
@@ -92,8 +100,10 @@ app.post('/ibeacons', function(request, response){
     var ibeacons = new_data.ibeacons;
     //console.log("Receive new ibeacons data: ", ibeacons.length, "\t",  ibeacons);      // your JSON
     for (i in ibeacons) {
+        ibeacons[i]['timestamp'] = new_data.timestamp
         data["ibeacons"].push(ibeacons[i]);
     }
+    // console.log("CURR LABEL: ", new_data.label)
     //console.log("ibeacons_data: ", ibeacons_data);
     update_curr_dir(new_data.label);
     response.send("Received!");    // echo the result back
@@ -112,10 +122,9 @@ app.post('/pedometer', function(request, response){
 // Receive beacon data whenever we enter/exit a beacon's region
 app.post('/accelerometer', function(request, response){
     var new_data = request.body;
-    console.log(new_data)
 
-    for (i in new_data.data) {
-      data["accelerometer"].push(new_data[i])
+    for (i in new_data.readings) {
+      data["accelerometer"].push(new_data.readings[i])
     }
 
     //console.log("Receive new magnetometer data: ", request, new_data);      // your JSON

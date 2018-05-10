@@ -14,7 +14,7 @@ class BeaconTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        refreshLoop = Timer(fire: Date(), interval: 1.0, repeats: true, block: { (timer) in
+        refreshLoop = Timer(fire: Date(), interval: 0.7, repeats: true, block: { (timer) in
                 self.tableView.reloadData()
         })
         
@@ -57,8 +57,11 @@ class BeaconTableViewController: UITableViewController {
 
         // Configure the cell...
         let beacon = globalBeacons[indexPath.row]
-        cell.minorLabel.text = "\(beacon["minor"]!)"
-        cell.rssiLabel.text = "\(beacon["rssi"]!)"
+        if beacon == nil {
+            return cell
+        }
+        cell.minorLabel.text = "\(beacon!.beaconID.beaconNum())"
+        cell.rssiLabel.text = "\(beacon!.RSSI)"
         print("loaded data")
         
         return cell

@@ -17,6 +17,9 @@
 		B369038C209D34D900E6DFBD /* IndoorLocUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B369038B209D34D900E6DFBD /* IndoorLocUITests.swift */; };
 		E18E859B20A3D32700716C0F /* BeaconTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18E859A20A3D32700716C0F /* BeaconTableViewCell.swift */; };
 		E18E859D20A3D5BB00716C0F /* BeaconTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18E859C20A3D5BB00716C0F /* BeaconTableViewController.swift */; };
+		E18E859F20A41F4800716C0F /* Eddystone.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18E859E20A41F4800716C0F /* Eddystone.swift */; };
+		E18E85A120A4207500716C0F /* BeaconScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18E85A020A4207500716C0F /* BeaconScanner.swift */; };
+		E18E85A320A4209100716C0F /* DispatchTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18E85A220A4209100716C0F /* DispatchTimer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +56,9 @@
 		B369038D209D34D900E6DFBD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E18E859A20A3D32700716C0F /* BeaconTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeaconTableViewCell.swift; sourceTree = "<group>"; };
 		E18E859C20A3D5BB00716C0F /* BeaconTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeaconTableViewController.swift; sourceTree = "<group>"; };
+		E18E859E20A41F4800716C0F /* Eddystone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eddystone.swift; sourceTree = "<group>"; };
+		E18E85A020A4207500716C0F /* BeaconScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeaconScanner.swift; sourceTree = "<group>"; };
+		E18E85A220A4209100716C0F /* DispatchTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DispatchTimer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +89,9 @@
 		B369035C209D34D700E6DFBD = {
 			isa = PBXGroup;
 			children = (
+				E18E85A220A4209100716C0F /* DispatchTimer.swift */,
+				E18E859E20A41F4800716C0F /* Eddystone.swift */,
+				E18E85A020A4207500716C0F /* BeaconScanner.swift */,
 				B3690367209D34D700E6DFBD /* IndoorLoc */,
 				B369037F209D34D900E6DFBD /* IndoorLocTests */,
 				B369038A209D34D900E6DFBD /* IndoorLocUITests */,
@@ -269,10 +278,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				B369036B209D34D700E6DFBD /* ViewController.swift in Sources */,
+				E18E85A120A4207500716C0F /* BeaconScanner.swift in Sources */,
 				B3690371209D34D700E6DFBD /* IndoorLoc.xcdatamodeld in Sources */,
 				B3690369209D34D700E6DFBD /* AppDelegate.swift in Sources */,
+				E18E859F20A41F4800716C0F /* Eddystone.swift in Sources */,
 				E18E859B20A3D32700716C0F /* BeaconTableViewCell.swift in Sources */,
 				E18E859D20A3D5BB00716C0F /* BeaconTableViewController.swift in Sources */,
+				E18E85A320A4209100716C0F /* DispatchTimer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

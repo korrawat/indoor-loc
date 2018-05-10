@@ -10,7 +10,7 @@ import UIKit
 import CoreLocation
 import CoreMotion
 
-var globalBeacons = [[String: Any]]()
+var globalBeacons = [BeaconInfo?](repeating: nil, count: 9)
 
 import CoreFoundation
 
@@ -38,7 +38,7 @@ class ParkBenchTimer {
     }
 }
 
-class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDelegate {
+class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDelegate, BeaconScannerDelegate {
     var trueHeading = 0.0
     var magneticHeading = 0.0
     let locationManager = CLLocationManager()
@@ -57,6 +57,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     var stopwatch: ParkBenchTimer!
     var stopwatchloop: Timer!
     var stopped = true
+    var beaconScanner: BeaconScanner!
+    var beaconTimer: Timer!
 
     @IBOutlet weak var dataTextField: UITextField!
     
@@ -119,7 +121,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
  
         // Create the region
         region = CLBeaconRegion(proximityUUID: proximityUUID!, major: major, identifier: beaconID)
-        
+
     }
     
     //Text field delegate methods
@@ -142,7 +144,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         motionManager = CMMotionManager()
         motionManager.startAccelerometerUpdates()
         
-        startAccelerometers()
+        startAccelerometers();
         monitorBeacons();
         startPedometer();
         self.stopped = false
@@ -185,6 +187,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
             self.stopwatchloop = nil
         }
         
+        if self.beaconTimer != nil {
+            self.beaconTimer.invalidate()
+            self.beaconTimer = nil
+        }
+        
+        
         statusLabel.text = "Stopped"
         self.responseLabel.text = "Stopped"
     }
@@ -194,14 +202,72 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         // Dispose of any resources that can be recreated.
     }
     
+    func monitorBeacons(){
+        self.beaconScanner = BeaconScanner()
+        self.beaconScanner!.delegate = self
+        self.beaconScanner!.startScanning()
+        
+        beaconTimer = Timer(fire: Date(), interval: 1.0, repeats: true, block: { (timer) in
+            if globalBeacons.count > 0 {
+                var beaconArray = [[String: Any]]()
+                print(globalBeacons.count, globalBeacons)
+
+                for beacon in globalBeacons {
+                    if beacon == nil {
+                        continue
+                    }
+                    let rssi = beacon!.RSSI
+                    let id = beacon!.beaconID.beaconNum()
+                    
+                    let beaconDict: [String: Any] = [
+                        "id": id,
+                        "rssi": rssi,
+                    ]
+
+                    beaconArray.append(beaconDict)
+                }
+
+                let timestamp = NSDate().timeIntervalSince1970
+                let jsonData = ["ibeacons": beaconArray, "timestamp": timestamp, "label": self.dataLabel] as [String : Any]
+                print("Number of Beacons: ", globalBeacons.count)
+                print("Beacons: ", jsonData)
+
+                self.sendData(json: jsonData, endpoint: "ibeacons")
+            }
+        })
+        
+        RunLoop.current.add(self.beaconTimer!, forMode: .defaultRunLoopMode)
+    }
+    
+    
+    func didFindBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
+        NSLog("FOUND: %@", beaconInfo.description)
+        globalBeacons[beaconInfo.beaconID.beaconNum()] = beaconInfo
+    }
+    
+    func didLoseBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
+        NSLog("LOST: %@", beaconInfo.description)
+        globalBeacons[beaconInfo.beaconID.beaconNum()] = beaconInfo
+    }
+    
+    func didUpdateBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
+        globalBeacons[beaconInfo.beaconID.beaconNum()] = beaconInfo
+        NSLog("UPDATE: %@", beaconInfo.description)
+    }
+    
+    func didObserveURLBeacon(beaconScanner: BeaconScanner, URL: NSURL, RSSI: Int) {
+        NSLog("URL SEEN: %@, RSSI: %d", URL, RSSI)
+    }
+
+    
     func startAccelerometers() {
         // Make sure the accelerometer hardware is available.
         if motionManager.isAccelerometerAvailable {
-            motionManager.accelerometerUpdateInterval = 6.0 / 60.0
+            motionManager.accelerometerUpdateInterval = 60.0 / 60.0
             motionManager.startAccelerometerUpdates()
             
             // Configure a timer to fetch the data.
-            timer = Timer(fire: Date(), interval: (6.0/60.0),
+            timer = Timer(fire: Date(), interval: (60.0/60.0),
                                repeats: true, block: { (timer) in
                                 // Get the accelerometer data.
                                 if let data = self.motionManager.accelerometerData {
@@ -308,71 +374,71 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         print(status.rawValue)
     }
     
-    func locationManager(_ manager: CLLocationManager,
-                         didEnterRegion region: CLRegion) {
-        
-        print("Enter: ", region);
-        print("region.id: ", region.identifier);
-        if region is CLBeaconRegion {
-            // Start ranging only if the feature is available.
-            if CLLocationManager.isRangingAvailable() {
-                manager.startRangingBeacons(in: region as! CLBeaconRegion)
-                
-                // Store the beacon so that ranging can be stopped on demand.
-                beaconsToRange.append(region as! CLBeaconRegion)
-            }
-        }
-    }
+//    func locationManager(_ manager: CLLocationManager,
+//                         didEnterRegion region: CLRegion) {
+//
+//        print("Enter: ", region);
+//        print("region.id: ", region.identifier);
+//        if region is CLBeaconRegion {
+//            // Start ranging only if the feature is available.
+//            if CLLocationManager.isRangingAvailable() {
+//                manager.startRangingBeacons(in: region as! CLBeaconRegion)
+//
+//                // Store the beacon so that ranging can be stopped on demand.
+//                beaconsToRange.append(region as! CLBeaconRegion)
+//            }
+//        }
+//    }
     
-    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        beaconsToRange = beaconsToRange.filter() {$0 != region}
-        print("Exit region");
-    }
-    
-    func locationManager(_ manager: CLLocationManager,
-                         didRangeBeacons beacons: [CLBeacon],
-                         in region: CLBeaconRegion) {
-        if beacons.count > 0 {
-            var beaconArray = [[String: Any]]()
-            print(beacons.count, beacons)
-            
-            for beacon in beacons {
-                let major = CLBeaconMajorValue(beacon.major)
-                let minor = CLBeaconMinorValue(beacon.minor)
-                let rssi = beacon.rssi
-                let accuracy = beacon.accuracy
-                let proximity = beacon.proximity.rawValue
-                
-                let beaconDict: [String: Any] = [
-                    "minor": minor,
-                    "rssi": rssi,
-                    "accuracy": accuracy,
-                    "proximity": proximity,
-                ]
-                
-                beaconArray.append(beaconDict)
-            }
-            
-            let timestamp = NSDate().timeIntervalSince1970
-            globalBeacons = beaconArray
-            let jsonData = ["ibeacons": beaconArray, "timestamp": timestamp, "label": self.dataLabel] as [String : Any]
-            print("Number of Beacons: ", beacons.count)
-            print("Beacons: ", jsonData)
-            
-            sendData(json: jsonData, endpoint: "ibeacons")
-        }
-    }
-    
-    func monitorBeacons() {
-        if CLLocationManager.isMonitoringAvailable(for:
-            CLBeaconRegion.self) {
-            // Match all beacons with the specified UUID
-            
-            self.locationManager.startMonitoring(for: region)
-            
-            print("is monitoring BLE");
-        }
-    }
-    
+//    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+//        beaconsToRange = beaconsToRange.filter() {$0 != region}
+//        print("Exit region");
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager,
+//                         didRangeBeacons beacons: [CLBeacon],
+//                         in region: CLBeaconRegion) {
+//        if beacons.count > 0 {
+//            var beaconArray = [[String: Any]]()
+//            print(beacons.count, beacons)
+//
+//            for beacon in beacons {
+//                let major = CLBeaconMajorValue(beacon.major)
+//                let minor = CLBeaconMinorValue(beacon.minor)
+//                let rssi = beacon.rssi
+//                let accuracy = beacon.accuracy
+//                let proximity = beacon.proximity.rawValue
+//
+//                let beaconDict: [String: Any] = [
+//                    "minor": minor,
+//                    "rssi": rssi,
+//                    "accuracy": accuracy,
+//                    "proximity": proximity,
+//                ]
+//
+//                beaconArray.append(beaconDict)
+//            }
+//
+//            let timestamp = NSDate().timeIntervalSince1970
+//            globalBeacons = beaconArray
+//            let jsonData = ["ibeacons": beaconArray, "timestamp": timestamp, "label": self.dataLabel] as [String : Any]
+//            print("Number of Beacons: ", beacons.count)
+//            print("Beacons: ", jsonData)
+//
+//            sendData(json: jsonData, endpoint: "ibeacons")
+//        }
+//    }
+//
+//    func monitorBeacons() {
+//        if CLLocationManager.isMonitoringAvailable(for:
+//            CLBeaconRegion.self) {
+//            // Match all beacons with the specified UUID
+//
+//            self.locationManager.startMonitoring(for: region)
+//
+//            print("is monitoring BLE");
+//        }
+//    }
+//
 }
 

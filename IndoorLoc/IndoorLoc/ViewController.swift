@@ -210,7 +210,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
                                         "timestamp": timestamp,
                                         "xAcceleration": x,
                                         "yAcceleration": y,
-                                        "zAcceleration": z ,
+                                        "zAcceleration": z,
+                                        "magneticHeading": self.magneticHeading
                                     ]
                                     
                                     self.accelerometerArray.append(accelerometerDict);
@@ -223,9 +224,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
                 let timestamp = Date().timeIntervalSince1970
 
                 let jsondata: [String: Any] = [
-                    "timestamp": timestamp,
                     "label": self.dataLabel,
-                    "magneticHeading": self.magneticHeading,
                     "readings": self.accelerometerArray
                 ]
                 

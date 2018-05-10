@@ -25,13 +25,12 @@
 
 {
     "label": "string", // data label
-    "timestamp": 1231241231312, // seconds time,
-    "magneticHeading": 1,
-    "readings": [{
+    "data": [{
         "timestamp": 1231241231312, // seconds time,
         "xAcceleration": 1, 
         "yAcceleration": 1, 
-        "zAcceleration": 1
+        "zAcceleration": 1,
+        "magneticHeading": 1,
     },
     {
         "timestamp": 1231241231312, // seconds time,

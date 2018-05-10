@@ -2,111 +2,127 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const app = express()
+const mkdirp = require('mkdirp');
 
-var ibeacons_data = [];
-var pedometer_data = [];
-var accelerometer_data = [];
+const EXPORT_INTERVAL = 3 // in seconds
+const DEBUG = false;
+const DEFAULT_EXPORT_DIR = "collected_data/";
+
+var data = {"ibeacons": [], "pedometer": [], "accelerometer": []};
 var curr_id = 0;
+var current_dir = DEFAULT_EXPORT_DIR;
 
 app.use(bodyParser.json());
 
-var export_data = function() {
-  const timestamp = Date.now();
-  const filename = "collected_data/" + timestamp.toString() + ".json";
-  const json = JSON.stringify(ibeacons_data);
-  fs.writeFile(filename, json, 'utf8', function(err) {
+var update_curr_dir = function(curr_label) {
+  if(curr_label == '') {
+    current_dir = DEFAULT_EXPORT_DIR;
+    console.log("Update curr dir to default :", current_dir);
+    return;
+  }
+  current_dir = DEFAULT_EXPORT_DIR + curr_label.toLowerCase().split(' ').join('_') + '/'
+  console.log("Update curr dir to ", current_dir, " from label ", curr_label)
+}
+
+var write_data_file = function(dir_path, category, timestamp) {
+  const filename = dir_path + category + '/' + timestamp + ".json";
+  var jsonData;
+  if (category == "all") {
+    jsonData = JSON.stringify(data);
+  } else {
+    jsonData = JSON.stringify(data[category]);
+  }
+
+  fs.writeFile(filename, jsonData, 'utf8', function(err) {
       if(err) {
           return console.log("ERROR Exporting to file: ", err);
       }
-      console.log("Export to the file: " + filename);
-      ibeacons_data = [];
+      if (DEBUG) {
+        console.log("Export " + category + " to the file: " + filename);
+      }
+      // clean array
+      data[category] = [];
   });
 
 }
 
-setInterval(export_data, 30000);
+var init_collection = function(dir_name, categories) {
+  console.log("Creating a new collection ", dir_name, " ...")
+  EXPORT_DIR = dir_name + '/'
+  mkdirp(EXPORT_DIR, function(err) { 
+    if(err) {
+      console.log("Cannot create a collection dir: ", EXPORT_DIR)
+    } else {
+      console.log("Create a collection dir: ", EXPORT_DIR)
+      for (i in categories) {
+        const subdir_name = EXPORT_DIR + categories[i] + '/';
+        mkdirp(subdir_name , function(err) { 
+          if(err) {
+            console.log("Cannot create a dir: ", subdir_name)
+          } else {
+            console.log("Create a dir: ", subdir_name)
+          }
+        });
+      }
+    }
+  });
+}
+
+var export_data = function() {
+
+  const timestamp = Date.now().toString();
+  const data_categories = ["ibeacons", "pedometer", "accelerometer", "all"];
+
+  if (!fs.existsSync(current_dir)){
+    init_collection(current_dir, data_categories);
+  }
+
+  data_categories.forEach(function(category){
+    write_data_file(current_dir, category, timestamp);
+  });
+
+  console.log("Export files: " + timestamp + ".json to " + data_categories.join(", "));
+}
+
+setInterval(export_data, EXPORT_INTERVAL * 1000);
 
 // Receive beacon data whenever we enter/exit a beacon's region
 app.post('/ibeacons', function(request, response){
     var new_data = request.body;
-    // var ibeacons = JSON.parse(new_data.ibeacons);
     var ibeacons = new_data.ibeacons;
-    console.log("Receive new ibeacons data: ", request, new_data, new_data.ibeacons, ibeacons, typeof(ibeacons));      // your JSON
+    //console.log("Receive new ibeacons data: ", ibeacons.length, "\t",  ibeacons);      // your JSON
     for (i in ibeacons) {
-        ibeacons_data.push(ibeacons[i]);
+        data["ibeacons"].push(ibeacons[i]);
     }
-    // ibeacons_data = ibeacons_data.concat(ibeacons);
-    console.log("ibeacons_data: ", ibeacons_data);
+    //console.log("ibeacons_data: ", ibeacons_data);
+    update_curr_dir(new_data.label);
     response.send("Received!");    // echo the result back
 });
 
 // Receive beacon data whenever we enter/exit a beacon's region
 app.post('/pedometer', function(request, response){
     var new_data = request.body;
-    pedometer_data.push(new_data)
+    data["pedometer"].push(new_data);
 
-    console.log("Received pedometer data: ", request, new_data);
+    //console.log("Received pedometer data: ", request, new_data);
+    update_curr_dir(new_data.label);
     response.send("Received!");    // echo the result back
 });
 
 // Receive beacon data whenever we enter/exit a beacon's region
 app.post('/accelerometer', function(request, response){
     var new_data = request.body;
-    var readings = new_data.readings;
-    var heading = new_data.magneticHeading;
+    console.log(new_data)
 
-    for (r in readings) {
-      accelerometer_data.push(r)
+    for (i in new_data.data) {
+      data["accelerometer"].push(new_data[i])
     }
 
-    console.log("Receive new magnetometer data: ", request, new_data);      // your JSON
+    //console.log("Receive new magnetometer data: ", request, new_data);      // your JSON
+    update_curr_dir(new_data.label);
     response.send("Received!");    // echo the result back
 });
 
 
-app.get('/addpoint/:touchval', (req, res) => {
-  var touchval = req.params.touchval;
-  res.send("Added: " + touchval);
-  console.log("Add point: ", touchval);
-  touches.push([Number(touchval)]);
-  curr_id ++;
-  console.log("Points: ", touches);
-})
 
-app.get('/addpoints/:touchvals', (req, res) => {
-  var touchvals = req.params.touchvals.split("-");
-  touchvals = touchvals.map( val => Number(val));
-  touches[curr_id] = touchvals;
-  curr_id ++;
-  res.send("Added: " + touchvals);
-  console.log("Add points: ", touchvals);
-  console.log(String(curr_id), "Points: ", touches);
-})
-
-
-app.get('/getpoint/:id', (req, res) => {
-  var length = touches.length;
-  var id = req.params.id;
-  if (id >= length) {
-    res.send("ERROR: Point ID NOT found!");
-  } else {
-    res.send(touches[id]);
-  }
-})
-
-
-app.get('/getlatest', (req, res) => {
-  if (curr_id <= 0) {
-    res.send("NULL: No point added");
-  } else {
-    var result = "id = "+ String(curr_id - 1) +": " + touches[curr_id - 1];
-    res.send(result);
-  }
-})
-
-app.get('/getlatestid', (req, res) => {
-    res.send(String(curr_id - 1));
-})
-
-
-app.listen(3001, () => console.log('Localization is listening on port 3001!'))
+app.listen(3000, () => console.log('Localization is listening on port 3000!'))

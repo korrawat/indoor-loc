@@ -152,9 +152,9 @@ Steps Label</string>
                         <outlet property="accZLabel" destination="wjM-7C-2f7" id="3Cq-xu-KTD"/>
                         <outlet property="dataTextField" destination="9v4-II-EHT" id="jFJ-yd-Mw0"/>
                         <outlet property="distanceLabel" destination="0NW-FZ-0Sx" id="dCG-D0-Wow"/>
-                        <outlet property="isCollectingLabel" destination="B7l-rA-6UL" id="vsG-kh-cti"/>
                         <outlet property="magneticHeadingLabel" destination="XbE-K2-aJh" id="koH-e0-Cmg"/>
                         <outlet property="responseLabel" destination="ekm-UG-UUM" id="Zus-u9-KSz"/>
+                        <outlet property="statusLabel" destination="B7l-rA-6UL" id="vsG-kh-cti"/>
                         <outlet property="stepsLabel" destination="nRn-cM-ZLT" id="1fJ-5E-gD8"/>
                         <outlet property="trueHeadingLabel" destination="AR5-9s-JDX" id="mBb-1w-Sbe"/>
                     </connections>

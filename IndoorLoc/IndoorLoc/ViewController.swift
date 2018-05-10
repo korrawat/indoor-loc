@@ -67,7 +67,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     @IBOutlet weak var accZLabel: UILabel!
     @IBOutlet weak var distanceLabel: UILabel!
     @IBOutlet weak var stepsLabel: UILabel!
-    @IBOutlet weak var isCollectingLabel: UILabel!
+    @IBOutlet weak var statusLabel: UILabel!
     @IBOutlet weak var responseLabel: UILabel!
     
     private func sendData(json: [String: Any], endpoint: String) {
@@ -135,6 +135,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     
     //Actions
     @IBAction func startCollecting(_ sender: UIButton) {
+        if self.stopped == false {
+            self.statusLabel.text = "Already started"
+            return
+        }
         motionManager = CMMotionManager()
         motionManager.startAccelerometerUpdates()
         
@@ -145,13 +149,13 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         
         self.stopwatch = ParkBenchTimer()
         
-        stopwatchloop = Timer(fire: Date(), interval: 1.0, repeats: true, block: { (timer) in
+        self.stopwatchloop = Timer(fire: Date(), interval: 1.0, repeats: true, block: { (timer) in
                 let time = self.stopwatch.stop()
                 let hours = Int(time) / 3600
                 let minutes = Int(time) / 60 % 60
                 let seconds = Int(time) % 60
                 let stamp = String(format:"%02i:%02i:%02i", hours, minutes, seconds)
-                self.isCollectingLabel.text = stamp
+                self.statusLabel.text = stamp
         })
         
         RunLoop.current.add(self.stopwatchloop!, forMode: .defaultRunLoopMode)
@@ -176,12 +180,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
             sendloop = nil
         }
         
-        if stopwatchloop != nil {
-            stopwatchloop.invalidate()
-            stopwatchloop = nil
+        if self.stopwatchloop != nil {
+            self.stopwatchloop.invalidate()
+            self.stopwatchloop = nil
         }
         
-        isCollectingLabel.text = "Stopped"
+        statusLabel.text = "Stopped"
         self.responseLabel.text = "Stopped"
     }
     
@@ -193,11 +197,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     func startAccelerometers() {
         // Make sure the accelerometer hardware is available.
         if motionManager.isAccelerometerAvailable {
-            motionManager.accelerometerUpdateInterval = 10.0 / 60.0
+            motionManager.accelerometerUpdateInterval = 6.0 / 60.0
             motionManager.startAccelerometerUpdates()
             
             // Configure a timer to fetch the data.
-            timer = Timer(fire: Date(), interval: (10.0/60.0),
+            timer = Timer(fire: Date(), interval: (6.0/60.0),
                                repeats: true, block: { (timer) in
                                 // Get the accelerometer data.
                                 if let data = self.motionManager.accelerometerData {

@@ -3,6 +3,7 @@
 {
     "uuid": "FDA50693-A4E2-4FB1-AFCF-C6EB07647825",
     "timestamp": 1231241231312, // seconds time
+    "label": "string", // data label
     "beacons": [{
         "minor": 1,
         "rssi": -73,
@@ -13,17 +14,18 @@
 
 //POST /pedometers
 {
+    "label": "string", // data label
     "timestamp": 1231241231312, // seconds time
     "stepsTaken": 1,
     "distanceTraveled": 1,
-    "pace": 1, 
-    "cadence": 1
 }
 
 //POST /accelerometers
 // Once per second
 
 {
+    "label": "string", // data label
+    "timestamp": 1231241231312, // seconds time,
     "magneticHeading": 1,
     "readings": [{
         "timestamp": 1231241231312, // seconds time,

@@ -12,6 +12,32 @@ import CoreMotion
 
 var globalBeacons = [[String: Any]]()
 
+import CoreFoundation
+
+class ParkBenchTimer {
+    
+    let startTime:CFAbsoluteTime
+    var endTime:CFAbsoluteTime?
+    
+    init() {
+        startTime = CFAbsoluteTimeGetCurrent()
+    }
+    
+    func stop() -> CFAbsoluteTime {
+        endTime = CFAbsoluteTimeGetCurrent()
+        
+        return duration!
+    }
+    
+    var duration:CFAbsoluteTime? {
+        if let endTime = endTime {
+            return endTime - startTime
+        } else {
+            return nil
+        }
+    }
+}
+
 class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDelegate {
     var trueHeading = 0.0
     var magneticHeading = 0.0
@@ -28,6 +54,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     let major: CLBeaconMajorValue = 10999
     var region: CLBeaconRegion!
     var dataLabel = ""
+    var stopwatch: ParkBenchTimer!
+    var stopwatchloop: Timer!
 
     @IBOutlet weak var dataTextField: UITextField!
     
@@ -39,6 +67,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     @IBOutlet weak var distanceLabel: UILabel!
     @IBOutlet weak var stepsLabel: UILabel!
     @IBOutlet weak var isCollectingLabel: UILabel!
+    @IBOutlet weak var responseLabel: UILabel!
     
     private func sendData(json: [String: Any], endpoint: String) {
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
@@ -52,10 +81,17 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
+                DispatchQueue.main.async {
+                    self.responseLabel.text = error?.localizedDescription ?? "No data"
+                }
                 return
             }
             
-            print(NSString(data: data, encoding: String.Encoding.utf8.rawValue) ?? "default")
+            let responsetext = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
+            DispatchQueue.main.async {
+                self.responseLabel.text = responsetext as! String
+            }
+            print(responsetext!)
         }
         task.resume()
     }
@@ -100,7 +136,21 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         monitorBeacons();
         startPedometer();
         isCollectingLabel.text = "Collecting..."
+        
+        self.stopwatch = ParkBenchTimer()
+        
+        stopwatchloop = Timer(fire: Date(), interval: 1.0, repeats: true, block: { (timer) in
+                let time = self.stopwatch.stop()
+                let hours = Int(time) / 3600
+                let minutes = Int(time) / 60 % 60
+                let seconds = Int(time) % 60
+                let stamp = String(format:"%02i:%02i:%02i", hours, minutes, seconds)
+                self.isCollectingLabel.text = stamp
+        })
+        
+        RunLoop.current.add(self.stopwatchloop!, forMode: .defaultRunLoopMode)
     }
+    
     
     @IBAction func stopCollecting(_ sender: UIButton) {
         pedometer.stopUpdates()
@@ -117,6 +167,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         if sendloop != nil {
             sendloop.invalidate()
             sendloop = nil
+        }
+        
+        if stopwatchloop != nil {
+            stopwatchloop.invalidate()
+            stopwatchloop = nil
         }
         
         isCollectingLabel.text = "Stopped"

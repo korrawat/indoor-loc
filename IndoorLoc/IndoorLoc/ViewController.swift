@@ -10,6 +10,8 @@ import UIKit
 import CoreLocation
 import CoreMotion
 
+var globalBeacons = [[String: Any]]()
+
 class ViewController: UIViewController, CLLocationManagerDelegate {
     var trueHeading = 0.0
     var magneticHeading = 0.0
@@ -20,6 +22,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     var sendloop: Timer!
     var beaconsToRange: [CLBeaconRegion] = []
     var accelerometerArray = [Any]()
+    let proximityUUID = UUID(uuidString:
+        "FDA50693-A4E2-4FB1-AFCF-C6EB07647825")
+    let beaconID = "com.example.myBeaconRegion"
+    let major: CLBeaconMajorValue = 10999
+    var region: CLBeaconRegion!
+    
     
     @IBOutlet weak var trueHeadingLabel: UILabel!
     @IBOutlet weak var magneticHeadingLabel: UILabel!
@@ -63,7 +71,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         locationManager.startUpdatingHeading()
         locationManager.startUpdatingLocation()
  
-
+        // Create the region
+        region = CLBeaconRegion(proximityUUID: proximityUUID!, major: major, identifier: beaconID)
+        
     }
     
     //Actions
@@ -80,13 +90,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     @IBAction func stopCollecting(_ sender: UIButton) {
         pedometer.stopUpdates()
         motionManager.stopAccelerometerUpdates()
-        let proximityUUID = UUID(uuidString:
-            "FDA50693-A4E2-4FB1-AFCF-C6EB07647825")
-        let beaconID = "com.example.myBeaconRegion"
         
-        // Create the region and begin monitoring it.
-        let region = CLBeaconRegion(proximityUUID: proximityUUID!,
-                                    identifier: beaconID)
         self.locationManager.stopMonitoring(for: region)
         
         // Invalidate timers
@@ -111,7 +115,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     func startAccelerometers() {
         // Make sure the accelerometer hardware is available.
         if motionManager.isAccelerometerAvailable {
-            motionManager.accelerometerUpdateInterval = 1.0 / 60.0
+            motionManager.accelerometerUpdateInterval = 10.0 / 60.0
             motionManager.startAccelerometerUpdates()
             
             // Configure a timer to fetch the data.
@@ -244,7 +248,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                          didRangeBeacons beacons: [CLBeacon],
                          in region: CLBeaconRegion) {
         if beacons.count > 0 {
-            var beaconArray = [Any]()
+            var beaconArray = [[String: Any]]()
             print(beacons.count, beacons)
             
             let timestamp = NSDate().timeIntervalSince1970
@@ -261,12 +265,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                     "rssi": rssi,
                     "accuracy": accuracy,
                     "proximity": proximity,
-                    "timestamp": timestamp
                 ]
                 
                 beaconArray.append(beaconDict)
             }
             
+            globalBeacons = beaconArray
             let jsonData = ["ibeacons": beaconArray, "timestamp": timestamp] as [String : Any]
             print("Number of Beacons: ", beacons.count)
             print("Beacons: ", jsonData)
@@ -279,14 +283,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         if CLLocationManager.isMonitoringAvailable(for:
             CLBeaconRegion.self) {
             // Match all beacons with the specified UUID
-            let proximityUUID = UUID(uuidString:
-                "FDA50693-A4E2-4FB1-AFCF-C6EB07647825")
-            let beaconID = "com.example.myBeaconRegion"
-            let major: CLBeaconMajorValue = 10999
             
-            // Create the region and begin monitoring it.
-            let region = CLBeaconRegion(proximityUUID: proximityUUID!, major: major,
-                                        identifier: beaconID)
             self.locationManager.startMonitoring(for: region)
             
             print("is monitoring BLE");

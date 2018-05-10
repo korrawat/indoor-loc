@@ -56,6 +56,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     var dataLabel = ""
     var stopwatch: ParkBenchTimer!
     var stopwatchloop: Timer!
+    var stopped = true
 
     @IBOutlet weak var dataTextField: UITextField!
     
@@ -70,6 +71,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     @IBOutlet weak var responseLabel: UILabel!
     
     private func sendData(json: [String: Any], endpoint: String) {
+        if self.stopped {
+            self.responseLabel.text = "Stopped"
+            return
+        }
+        
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
         print("JSON: ", json);
         let url = URL(string: "http://159.65.37.143:3000/"+endpoint);
@@ -135,7 +141,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         startAccelerometers()
         monitorBeacons();
         startPedometer();
-        isCollectingLabel.text = "Collecting..."
+        self.stopped = false
         
         self.stopwatch = ParkBenchTimer()
         
@@ -155,6 +161,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     @IBAction func stopCollecting(_ sender: UIButton) {
         pedometer.stopUpdates()
         motionManager.stopAccelerometerUpdates()
+        self.stopped = true
         
         self.locationManager.stopMonitoring(for: region)
         
@@ -175,6 +182,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         }
         
         isCollectingLabel.text = "Stopped"
+        self.responseLabel.text = "Stopped"
     }
     
     override func didReceiveMemoryWarning() {

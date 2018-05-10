@@ -73,49 +73,5 @@ app.post('/accelerometer', function(request, response){
 });
 
 
-app.get('/addpoint/:touchval', (req, res) => {
-  var touchval = req.params.touchval;
-  res.send("Added: " + touchval);
-  console.log("Add point: ", touchval);
-  touches.push([Number(touchval)]);
-  curr_id ++;
-  console.log("Points: ", touches);
-})
-
-app.get('/addpoints/:touchvals', (req, res) => {
-  var touchvals = req.params.touchvals.split("-");
-  touchvals = touchvals.map( val => Number(val));
-  touches[curr_id] = touchvals;
-  curr_id ++;
-  res.send("Added: " + touchvals);
-  console.log("Add points: ", touchvals);
-  console.log(String(curr_id), "Points: ", touches);
-})
-
-
-app.get('/getpoint/:id', (req, res) => {
-  var length = touches.length;
-  var id = req.params.id;
-  if (id >= length) {
-    res.send("ERROR: Point ID NOT found!");
-  } else {
-    res.send(touches[id]);
-  }
-})
-
-
-app.get('/getlatest', (req, res) => {
-  if (curr_id <= 0) {
-    res.send("NULL: No point added");
-  } else {
-    var result = "id = "+ String(curr_id - 1) +": " + touches[curr_id - 1];
-    res.send(result);
-  }
-})
-
-app.get('/getlatestid', (req, res) => {
-    res.send(String(curr_id - 1));
-})
-
 
 app.listen(3000, () => console.log('Localization is listening on port 3000!'))

@@ -88,6 +88,18 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         let region = CLBeaconRegion(proximityUUID: proximityUUID!,
                                     identifier: beaconID)
         self.locationManager.stopMonitoring(for: region)
+        
+        // Invalidate timers
+        if timer != nil {
+            timer.invalidate()
+            timer = nil
+        }
+        
+        if sendloop != nil {
+            sendloop.invalidate()
+            sendloop = nil
+        }
+        
         isCollectingLabel.text = "Stopped"
     }
     
@@ -132,7 +144,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                                 }
             })
             
-            sendloop = Timer(fire: Date(), interval: 5.0, repeats: true, block: { (timer) in
+            sendloop = Timer(fire: Date(), interval: 2.0, repeats: true, block: { (timer) in
                 print("Sending accelerometer data, len array", self.accelerometerArray.count)
                 var jsondata: [String: Any] = [
                     "magneticHeading": self.magneticHeading,

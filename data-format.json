@@ -25,7 +25,7 @@
 
 {
     "label": "string", // data label
-    "data": [{
+    "readings": [{
         "timestamp": 1231241231312, // seconds time,
         "xAcceleration": 1, 
         "yAcceleration": 1, 

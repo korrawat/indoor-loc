@@ -97,7 +97,7 @@ Steps Label</string>
                                     <action selector="stopCollecting:" destination="BYZ-38-t0r" eventType="touchUpInside" id="1gu-YC-SBL"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="isCollecting" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="B7l-rA-6UL">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Press Start" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="B7l-rA-6UL">
                                 <rect key="frame" x="118" y="65" width="141" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -112,7 +112,7 @@ Steps Label</string>
                                     <action selector="startCollecting:" destination="BYZ-38-t0r" eventType="touchUpInside" id="9b6-gr-Bwi"/>
                                 </connections>
                             </button>
-                            <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="9v4-II-EHT">
+                            <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter label for data" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="9v4-II-EHT" userLabel="Data Label Field">
                                 <rect key="frame" x="112" y="94" width="234" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <nil key="textColor"/>
@@ -139,6 +139,7 @@ Steps Label</string>
                         <outlet property="accXLabel" destination="n9I-AN-8Pf" id="fen-KJ-3pl"/>
                         <outlet property="accYLabel" destination="bAa-4Q-B6v" id="2j1-Jh-rLb"/>
                         <outlet property="accZLabel" destination="wjM-7C-2f7" id="3Cq-xu-KTD"/>
+                        <outlet property="dataTextField" destination="9v4-II-EHT" id="jFJ-yd-Mw0"/>
                         <outlet property="distanceLabel" destination="0NW-FZ-0Sx" id="dCG-D0-Wow"/>
                         <outlet property="isCollectingLabel" destination="B7l-rA-6UL" id="vsG-kh-cti"/>
                         <outlet property="magneticHeadingLabel" destination="XbE-K2-aJh" id="koH-e0-Cmg"/>

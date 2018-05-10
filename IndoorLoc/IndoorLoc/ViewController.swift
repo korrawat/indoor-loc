@@ -12,7 +12,7 @@ import CoreMotion
 
 var globalBeacons = [[String: Any]]()
 
-class ViewController: UIViewController, CLLocationManagerDelegate {
+class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDelegate {
     var trueHeading = 0.0
     var magneticHeading = 0.0
     let locationManager = CLLocationManager()
@@ -27,7 +27,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     let beaconID = "com.example.myBeaconRegion"
     let major: CLBeaconMajorValue = 10999
     var region: CLBeaconRegion!
-    
+    var dataLabel = ""
+
+    @IBOutlet weak var dataTextField: UITextField!
     
     @IBOutlet weak var trueHeadingLabel: UILabel!
     @IBOutlet weak var magneticHeadingLabel: UILabel!
@@ -61,6 +63,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        dataTextField.delegate = self
+        
         locationManager.requestAlwaysAuthorization()
         locationManager.requestWhenInUseAuthorization()
         
@@ -74,6 +78,17 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         // Create the region
         region = CLBeaconRegion(proximityUUID: proximityUUID!, major: major, identifier: beaconID)
         
+    }
+    
+    //Text field delegate methods
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField){
+        self.dataLabel = textField.text!
     }
     
     //Actions
@@ -150,7 +165,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             
             sendloop = Timer(fire: Date(), interval: 2.0, repeats: true, block: { (timer) in
                 print("Sending accelerometer data, len array", self.accelerometerArray.count)
-                var jsondata: [String: Any] = [
+                let timestamp = Date().timeIntervalSince1970
+
+                let jsondata: [String: Any] = [
+                    "timestamp": timestamp,
+                    "label": self.dataLabel,
                     "magneticHeading": self.magneticHeading,
                     "readings": self.accelerometerArray
                 ]
@@ -189,13 +208,13 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             "timestamp": timestamp,
             "steps": pedometerData.numberOfSteps,
             "distanceTraveled": roundedDistance,
+             "label": self.dataLabel
         ]
         
         print("Pedometer data:", pedometerDict)
         stepsLabel.text = String(pedometerData.numberOfSteps as! Int)
         distanceLabel.text = String(roundedDistance)
         sendData(json: pedometerDict, endpoint: "pedometer")
-        
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
@@ -251,8 +270,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             var beaconArray = [[String: Any]]()
             print(beacons.count, beacons)
             
-            let timestamp = NSDate().timeIntervalSince1970
-            
             for beacon in beacons {
                 let major = CLBeaconMajorValue(beacon.major)
                 let minor = CLBeaconMinorValue(beacon.minor)
@@ -270,8 +287,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 beaconArray.append(beaconDict)
             }
             
+            let timestamp = NSDate().timeIntervalSince1970
             globalBeacons = beaconArray
-            let jsonData = ["ibeacons": beaconArray, "timestamp": timestamp] as [String : Any]
+            let jsonData = ["ibeacons": beaconArray, "timestamp": timestamp, "label": self.dataLabel] as [String : Any]
             print("Number of Beacons: ", beacons.count)
             print("Beacons: ", jsonData)
             

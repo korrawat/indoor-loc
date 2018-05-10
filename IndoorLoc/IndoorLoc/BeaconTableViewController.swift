@@ -14,7 +14,7 @@ class BeaconTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        refreshLoop = Timer(fire: Date(), interval: 2.0, repeats: true, block: { (timer) in
+        refreshLoop = Timer(fire: Date(), interval: 1.0, repeats: true, block: { (timer) in
                 self.tableView.reloadData()
         })
         

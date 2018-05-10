@@ -26,6 +26,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var accXLabel: UILabel!
     @IBOutlet weak var accYLabel: UILabel!
     @IBOutlet weak var accZLabel: UILabel!
+    @IBOutlet weak var distanceLabel: UILabel!
+    @IBOutlet weak var stepsLabel: UILabel!
+    @IBOutlet weak var isCollectingLabel: UILabel!
     
     private func sendData(json: [String: Any], endpoint: String) {
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
@@ -59,15 +62,35 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         locationManager.headingOrientation = .portrait
         locationManager.startUpdatingHeading()
         locationManager.startUpdatingLocation()
-        
+ 
+
+    }
+    
+    //Actions
+    @IBAction func startCollecting(_ sender: UIButton) {
         motionManager = CMMotionManager()
         motionManager.startAccelerometerUpdates()
         
         startAccelerometers()
         monitorBeacons();
         startPedometer();
+        isCollectingLabel.text = "Collecting..."
     }
-
+    
+    @IBAction func stopCollecting(_ sender: UIButton) {
+        pedometer.stopUpdates()
+        motionManager.stopAccelerometerUpdates()
+        let proximityUUID = UUID(uuidString:
+            "FDA50693-A4E2-4FB1-AFCF-C6EB07647825")
+        let beaconID = "com.example.myBeaconRegion"
+        
+        // Create the region and begin monitoring it.
+        let region = CLBeaconRegion(proximityUUID: proximityUUID!,
+                                    identifier: beaconID)
+        self.locationManager.stopMonitoring(for: region)
+        isCollectingLabel.text = "Stopped"
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -153,6 +176,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         ]
         
         print("Pedometer data:", pedometerDict)
+        stepsLabel.text = String(pedometerData.numberOfSteps as! Int)
+        distanceLabel.text = String(roundedDistance)
         sendData(json: pedometerDict, endpoint: "pedometer")
         
     }
@@ -253,6 +278,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             print("is monitoring BLE");
         }
     }
-
+    
 }
 

@@ -1,4 +1,3 @@
-
 class iBeaconData:
     def __init__(self, entry):
         self.rssi = entry['rssi']
@@ -6,10 +5,12 @@ class iBeaconData:
         self.minor = entry['minor']
         self.accuracy = entry['accuracy']
         self.timestamp = entry['timestamp']
-        
+
+
     def __repr__(self):
         return "iBeacon({})@{}: rssi={}, prox={}, accu={}".format(self.minor, self.timestamp, self.rssi, self.proximity, self.accuracy)
-    
+
+
 def get_data_by_timestamp(data):
     timestamp = None
     data_by_timestamp = {}

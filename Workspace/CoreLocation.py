@@ -31,8 +31,10 @@ class Locations:
         self.points.append(Point2D(np_point[0], np_point[1], timestamp))
 
 
-    def visualize(self, actual_loc=None, ax_limits=None):
-        fig, ax = plt.subplots()
+    def visualize(self, actual_loc=None, ax_limits=None, fig_ax=(None, None)):
+        fig, ax = fig_ax
+        if fig == None or ax == None:
+            fig, ax = plt.subplots()
         xs = list(map(lambda p: p.x, self.points))
         ys = list(map(lambda p: p.y, self.points))
         ax.plot(xs, ys, 'go-')
@@ -43,8 +45,10 @@ class Locations:
         return ax
 
 
-    def plot(self, actual_loc=None, ax_limits=None):
-        fig, ax = plt.subplots()
+    def plot(self, actual_loc=None, ax_limits=None, fig_ax=(None, None)):
+        fig, ax = fig_ax
+        if fig == None or ax == None:
+            fig, ax = plt.subplots()
         for point in self.points:
             point.plot(ax)
         if actual_loc:

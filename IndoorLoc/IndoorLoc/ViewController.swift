@@ -207,7 +207,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         self.beaconScanner!.delegate = self
         self.beaconScanner!.startScanning()
         
-        beaconTimer = Timer(fire: Date(), interval: 1.0, repeats: true, block: { (timer) in
+        beaconTimer = Timer(fire: Date(), interval: 0.1, repeats: true, block: { (timer) in
             if globalBeacons.count > 0 {
                 var beaconArray = [[String: Any]]()
                 print(globalBeacons.count, globalBeacons)
@@ -242,32 +242,32 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     
     func didFindBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
         NSLog("FOUND: %@", beaconInfo.description)
-        globalBeacons[beaconInfo.beaconID.beaconNum()] = beaconInfo
+        globalBeacons[beaconInfo.beaconID.beaconNum() - 1] = beaconInfo
     }
     
     func didLoseBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
         NSLog("LOST: %@", beaconInfo.description)
-        globalBeacons[beaconInfo.beaconID.beaconNum()] = beaconInfo
+        globalBeacons[beaconInfo.beaconID.beaconNum() - 1] = beaconInfo
     }
     
     func didUpdateBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
-        globalBeacons[beaconInfo.beaconID.beaconNum()] = beaconInfo
+        globalBeacons[beaconInfo.beaconID.beaconNum() - 1] = beaconInfo
         NSLog("UPDATE: %@", beaconInfo.description)
     }
     
     func didObserveURLBeacon(beaconScanner: BeaconScanner, URL: NSURL, RSSI: Int) {
         NSLog("URL SEEN: %@, RSSI: %d", URL, RSSI)
     }
-
     
+
     func startAccelerometers() {
         // Make sure the accelerometer hardware is available.
         if motionManager.isAccelerometerAvailable {
-            motionManager.accelerometerUpdateInterval = 60.0 / 60.0
+            motionManager.accelerometerUpdateInterval = 0.01
             motionManager.startAccelerometerUpdates()
             
             // Configure a timer to fetch the data.
-            timer = Timer(fire: Date(), interval: (60.0/60.0),
+            timer = Timer(fire: Date(), interval: 0.01,
                                repeats: true, block: { (timer) in
                                 // Get the accelerometer data.
                                 if let data = self.motionManager.accelerometerData {

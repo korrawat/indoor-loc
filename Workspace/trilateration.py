@@ -49,13 +49,3 @@ def trilaterate(beacon_locations_dict, beacon_distances_dict, L2=True):
                       method='L-BFGS-B')
     assert result.success
     return result.x
-        
-        
-        
-        
-        
-        
-        
-        
-
-

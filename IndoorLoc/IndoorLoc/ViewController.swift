@@ -10,7 +10,7 @@ import UIKit
 import CoreLocation
 import CoreMotion
 
-var globalBeacons = [BeaconInfo?](repeating: nil, count: 9)
+var globalBeacons = [BeaconInfo?](repeating: nil, count: 10)
 
 import CoreFoundation
 
@@ -214,8 +214,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         beaconTimer = Timer(fire: Date(), interval: 0.1, repeats: true, block: { (timer) in
             if globalBeacons.count > 0 {
                 var beaconArray = [[String: Any]]()
-                print(globalBeacons.count, globalBeacons)
-
+                
                 for beacon in globalBeacons {
                     if beacon == nil {
                         continue
@@ -246,17 +245,38 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     
     func didFindBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
         NSLog("FOUND: %@", beaconInfo.description)
-        globalBeacons[beaconInfo.beaconID.beaconNum() - 1] = beaconInfo
+        
+        let beaconnum = beaconInfo.beaconID.beaconNum()
+        if beaconnum == 0 {
+            print("Not our beacon")
+            return
+        }
+        
+        globalBeacons[beaconnum - 1] = beaconInfo
     }
     
     func didLoseBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
         NSLog("LOST: %@", beaconInfo.description)
-        globalBeacons[beaconInfo.beaconID.beaconNum() - 1] = beaconInfo
+        
+        let beaconnum = beaconInfo.beaconID.beaconNum()
+        if beaconnum == 0 {
+            print("Not our beacon")
+            return
+        }
+        
+        globalBeacons[beaconnum - 1] = beaconInfo
     }
     
     func didUpdateBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
-        globalBeacons[beaconInfo.beaconID.beaconNum() - 1] = beaconInfo
         NSLog("UPDATE: %@", beaconInfo.description)
+
+        let beaconnum = beaconInfo.beaconID.beaconNum()
+        if beaconnum == 0 {
+            print("Not our beacon")
+            return
+        }
+        
+        globalBeacons[beaconnum - 1] = beaconInfo
     }
     
     func didObserveURLBeacon(beaconScanner: BeaconScanner, URL: NSURL, RSSI: Int) {

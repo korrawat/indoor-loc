@@ -51,7 +51,10 @@ class BeaconID : NSObject {
     func beaconNum() -> Int {
         let retval = hexBeaconID(beaconID: self.beaconID).last!
         let retint = Int(String(retval))
-        return Int(String(retval))!
+        if let retint = retint {
+            return retint
+        }
+        return 0
     }
     
     private func hexBeaconID(beaconID: [UInt8]) -> String {

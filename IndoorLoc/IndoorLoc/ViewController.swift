@@ -145,9 +145,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
             return
         }
         motionManager = CMMotionManager()
-        motionManager.startAccelerometerUpdates()
         
         startAccelerometers();
+        startDeviceMotion()
         monitorBeacons();
         startPedometer();
         self.stopped = false
@@ -270,12 +270,13 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
             motionManager.startDeviceMotionUpdates(using: .xMagneticNorthZVertical)
             
             // Configure a timer to fetch the motion data.
-            self.timer = Timer(fire: Date(), interval: (1.0/60.0), repeats: true,
+            self.timerDeviceMotion = Timer(fire: Date(), interval: 0.01, repeats: true,
                                block: { (timer) in
                                 if let data = self.motionManager.deviceMotion {
                                     // Get the attitude relative to the magnetic north reference
                                     let attitude = data.attitude.quaternion
                                     let userAcceleration = data.userAcceleration
+                                    let heading = data.heading
                                     
                                     
                                     // Use the motion data in your app.
@@ -291,7 +292,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
                                         "zAttitude": attitude.z,
                                         "xAcceleration": userAcceleration.x,
                                         "yAcceleration": userAcceleration.y,
-                                        "zAcceleration": userAcceleration.z
+                                        "zAcceleration": userAcceleration.z,
+                                        "heading": heading
                                     ]
                                     
                                     self.deviceMotionArray.append(deviceMotionDict)

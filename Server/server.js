@@ -7,9 +7,9 @@ const mkdirp = require('mkdirp');
 const EXPORT_INTERVAL = 60 // in seconds
 const DEBUG = false;
 const DEFAULT_EXPORT_DIR = "collected_data/";
-const DATA_CATEGORIES = ["ibeacons", "pedometer", "accelerometer", "all"];
+const DATA_CATEGORIES = ["ibeacons", "pedometer", "accelerometer", "devicemotion", "all"];
 
-var data = {"ibeacons": [], "pedometer": [], "accelerometer": []};
+var data = {"ibeacons": [], "pedometer": [], "accelerometer": [], "devicemotion": []};
 var curr_id = 0;
 var current_dir = DEFAULT_EXPORT_DIR;
 
@@ -132,6 +132,17 @@ app.post('/accelerometer', function(request, response){
     response.send("Received!");    // echo the result back
 });
 
+app.post('/devicemotion', function(request, response){
+    var new_data = request.body;
+
+    for (i in new_data.readings) {
+      data["devicemotion"].push(new_data.readings[i])
+    }
+
+    // console.log("device motion:", new_data)
+    update_curr_dir(new_data.label);
+    response.send("Received!");    // echo the result back
+});
 
 
 app.listen(3000, () => console.log('Localization is listening on port 3000!'))

@@ -10,7 +10,7 @@ import UIKit
 import CoreLocation
 import CoreMotion
 
-var globalBeacons = [BeaconInfo?](repeating: nil, count: 9)
+var globalBeacons = [BeaconInfo?](repeating: nil, count: 10)
 
 import CoreFoundation
 
@@ -46,8 +46,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     var motionManager: CMMotionManager!
     var timer: Timer!
     var sendloop: Timer!
+    var timerDeviceMotion: Timer!
+    var sendloopDeviceMotion: Timer!
     var beaconsToRange: [CLBeaconRegion] = []
     var accelerometerArray = [Any]()
+    var deviceMotionArray = [Any]()
     let proximityUUID = UUID(uuidString:
         "FDA50693-A4E2-4FB1-AFCF-C6EB07647825")
     let beaconID = "com.example.myBeaconRegion"
@@ -142,9 +145,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
             return
         }
         motionManager = CMMotionManager()
-        motionManager.startAccelerometerUpdates()
         
         startAccelerometers();
+        startDeviceMotion()
         monitorBeacons();
         startPedometer();
         self.stopped = false
@@ -167,6 +170,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     @IBAction func stopCollecting(_ sender: UIButton) {
         pedometer.stopUpdates()
         motionManager.stopAccelerometerUpdates()
+        motionManager.stopDeviceMotionUpdates()
         self.stopped = true
         
         self.locationManager.stopMonitoring(for: region)
@@ -207,11 +211,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
         self.beaconScanner!.delegate = self
         self.beaconScanner!.startScanning()
         
-        beaconTimer = Timer(fire: Date(), interval: 1.0, repeats: true, block: { (timer) in
+        beaconTimer = Timer(fire: Date(), interval: 0.1, repeats: true, block: { (timer) in
             if globalBeacons.count > 0 {
                 var beaconArray = [[String: Any]]()
-                print(globalBeacons.count, globalBeacons)
-
+                
                 for beacon in globalBeacons {
                     if beacon == nil {
                         continue
@@ -242,32 +245,108 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
     
     func didFindBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
         NSLog("FOUND: %@", beaconInfo.description)
-        globalBeacons[beaconInfo.beaconID.beaconNum()] = beaconInfo
+        
+        let beaconnum = beaconInfo.beaconID.beaconNum()
+        if beaconnum == 0 {
+            print("Not our beacon")
+            return
+        }
+        
+        globalBeacons[beaconnum - 1] = beaconInfo
     }
     
     func didLoseBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
         NSLog("LOST: %@", beaconInfo.description)
-        globalBeacons[beaconInfo.beaconID.beaconNum()] = beaconInfo
+        
+        let beaconnum = beaconInfo.beaconID.beaconNum()
+        if beaconnum == 0 {
+            print("Not our beacon")
+            return
+        }
+        
+        globalBeacons[beaconnum - 1] = beaconInfo
     }
     
     func didUpdateBeacon(beaconScanner: BeaconScanner, beaconInfo: BeaconInfo) {
-        globalBeacons[beaconInfo.beaconID.beaconNum()] = beaconInfo
         NSLog("UPDATE: %@", beaconInfo.description)
+
+        let beaconnum = beaconInfo.beaconID.beaconNum()
+        if beaconnum == 0 {
+            print("Not our beacon")
+            return
+        }
+        
+        globalBeacons[beaconnum - 1] = beaconInfo
     }
     
     func didObserveURLBeacon(beaconScanner: BeaconScanner, URL: NSURL, RSSI: Int) {
         NSLog("URL SEEN: %@, RSSI: %d", URL, RSSI)
+    }
+    
+    func startDeviceMotion() {
+        if motionManager.isDeviceMotionAvailable {
+            motionManager.deviceMotionUpdateInterval = 0.01
+            motionManager.showsDeviceMovementDisplay = true
+            motionManager.startDeviceMotionUpdates(using: .xMagneticNorthZVertical)
+            
+            // Configure a timer to fetch the motion data.
+            self.timerDeviceMotion = Timer(fire: Date(), interval: 0.01, repeats: true,
+                               block: { (timer) in
+                                if let data = self.motionManager.deviceMotion {
+                                    // Get the attitude relative to the magnetic north reference
+                                    let attitude = data.attitude.quaternion
+                                    let userAcceleration = data.userAcceleration
+                                    let heading = data.heading
+                                    
+                                    
+                                    // Use the motion data in your app.
+                                    
+                                    // Send device motion data to the server
+                                    let timestamp = Date().timeIntervalSince1970
+                                    var deviceMotionDict: [String: Any];
+                                    deviceMotionDict = [
+                                        "timestamp": timestamp,
+                                        "wAttitude": attitude.w,
+                                        "xAttitude": attitude.x,
+                                        "yAttitude": attitude.y,
+                                        "zAttitude": attitude.z,
+                                        "xAcceleration": userAcceleration.x,
+                                        "yAcceleration": userAcceleration.y,
+                                        "zAcceleration": userAcceleration.z,
+                                        "heading": heading
+                                    ]
+                                    
+                                    self.deviceMotionArray.append(deviceMotionDict)
+                                }
+            })
+            
+            sendloopDeviceMotion = Timer(fire: Date(), interval: 2.0, repeats: true, block: { (timer) in
+                print("Sending device motion data, len array", self.deviceMotionArray.count)
+                
+                let jsondata: [String: Any] = [
+                    "label": self.dataLabel,
+                    "readings": self.deviceMotionArray
+                ]
+                
+                self.sendData(json: jsondata, endpoint: "devicemotion")
+                self.deviceMotionArray = [Any]()
+            })
+            
+            // Add the timer to the current run loop.
+            RunLoop.current.add(self.timerDeviceMotion!, forMode: .defaultRunLoopMode)
+            RunLoop.current.add(self.sendloopDeviceMotion!, forMode: .defaultRunLoopMode)
+        }
     }
 
     
     func startAccelerometers() {
         // Make sure the accelerometer hardware is available.
         if motionManager.isAccelerometerAvailable {
-            motionManager.accelerometerUpdateInterval = 60.0 / 60.0
+            motionManager.accelerometerUpdateInterval = 0.01
             motionManager.startAccelerometerUpdates()
             
             // Configure a timer to fetch the data.
-            timer = Timer(fire: Date(), interval: (60.0/60.0),
+            timer = Timer(fire: Date(), interval: 0.01,
                                repeats: true, block: { (timer) in
                                 // Get the accelerometer data.
                                 if let data = self.motionManager.accelerometerData {
@@ -299,7 +378,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDe
             
             sendloop = Timer(fire: Date(), interval: 2.0, repeats: true, block: { (timer) in
                 print("Sending accelerometer data, len array", self.accelerometerArray.count)
-                let timestamp = Date().timeIntervalSince1970
 
                 let jsondata: [String: Any] = [
                     "label": self.dataLabel,
